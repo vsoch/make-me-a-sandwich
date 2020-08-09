@@ -1,4 +1,3 @@
-import copy
 import random
 import pygame
 
@@ -66,32 +65,46 @@ class GridElement:
             # Draw the layers.
             height = (self.y_high - self.y_low) // len(self.type_indices)
             pygame.draw.rect(
-                screen, colors[type_index],
-                (self.x_low, self.y_low + height * i, self.x_high - self.x_low, height))
+                screen,
+                colors[type_index],
+                (self.x_low, self.y_low + height * i, self.x_high - self.x_low, height),
+            )
             # Draw a line between layers.
             if i > 0:
-                pygame.draw.line(screen, (0, 0, 0),
-                (self.x_low, self.y_low + height * i), (self.x_high, self.y_low + height * i), 6)
+                pygame.draw.line(
+                    screen,
+                    (0, 0, 0),
+                    (self.x_low, self.y_low + height * i),
+                    (self.x_high, self.y_low + height * i),
+                    6,
+                )
         # draw boundary if selected.
         if self.selected:
             pygame.draw.rect(
-            	screen, (255, 255, 0),
-                             (self.x_low,
-                              self.y_low,
-                              self.x_high - self.x_low - boundary_size / 2,
-                              self.y_high - self.y_low - boundary_size / 2), boundary_size)
+                screen,
+                (255, 255, 0),
+                (
+                    self.x_low,
+                    self.y_low,
+                    self.x_high - self.x_low - boundary_size / 2,
+                    self.y_high - self.y_low - boundary_size / 2,
+                ),
+                boundary_size,
+            )
+
 
 def get_neighbors(i, j):
     neighbors = []
     if i > 0:
-        neighbors.append((i-1, j))
+        neighbors.append((i - 1, j))
     if j > 0:
-        neighbors.append((i, j-1))
+        neighbors.append((i, j - 1))
     if i < num_rows - 1:
-        neighbors.append((i+1, j))
+        neighbors.append((i + 1, j))
     if j < num_cols - 1:
-        neighbors.append((i, j+1))
+        neighbors.append((i, j + 1))
     return neighbors
+
 
 # The grid stores all the sandwiches.
 grid = {}
@@ -102,7 +115,8 @@ for i in range(num_rows):
             j * square_y,
             i * square_x + square_x,
             j * square_y + square_y,
-            type_index=random.randrange(len(colors)))
+            type_index=random.randrange(len(colors)),
+        )
 
 while running:
 
@@ -148,7 +162,9 @@ while running:
                 if frozenset([el.type_indices[0], neighbor_type]) in compatible_types:
                     el.type_indices.insert(0, neighbor_type)
                     deleted.add(loc)
-                elif frozenset([el.type_indices[-1], neighbor_type]) in compatible_types:
+                elif (
+                    frozenset([el.type_indices[-1], neighbor_type]) in compatible_types
+                ):
                     el.type_indices.append(neighbor_type)
                     deleted.add(loc)
             # Update the neighbors. New layers may be added after adding some of the neighbors.
@@ -162,15 +178,18 @@ while running:
     for del_i, del_j in all_deleted:
         # Make a new element at the top of the column
         new_el = GridElement(
-                del_i * square_x,
-                -square_y,
-                del_i * square_x + square_x,
-                0,
-                type_index=random.randrange(len(colors)))
+            del_i * square_x,
+            -square_y,
+            del_i * square_x + square_x,
+            0,
+            type_index=random.randrange(len(colors)),
+        )
         # Add the new element to the grid.
         grid[del_i, -1] = new_el
         # Specify elements to be moved (there could be an animation).
-        moving_column = {loc: el for loc, el in grid.items() if loc[0] == del_i and loc[1] < del_j}
+        moving_column = {
+            loc: el for loc, el in grid.items() if loc[0] == del_i and loc[1] < del_j
+        }
         # Move the column down.
         for loc in moving_column:
             el = grid[loc]
